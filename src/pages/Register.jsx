@@ -1,20 +1,31 @@
-import { useState, useEffect } from "react";
-import { Logo } from "../components";
+import React, { useEffect, useState } from "react";
 import Wrapper from "../assets/wrappers/RegisterPage";
-import { useDispatch, useSelector } from "react-redux";
+import { Logo } from "../components";
+import { toast } from "react-toastify";
 import { loginUser, registerUser } from "../features/User/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { FormRow } from "../components";
 
-const initialState = {
+const intialState = {
   name: "",
   email: "",
   password: "",
   isMember: true,
 };
 
-function Register() {
+const Register = () => {
+  const [values, setValues] = useState(intialState);
   const dispatch = useDispatch();
-  const { isLoading, user } = useSelector((store) => store.user);
-  const [values, setValues] = useState(initialState);
+  const selector = useSelector();
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setValues({ ...values, [e.target.name]: e.target.value });
+  };
+  const toggleMember = () => {
+    setValues({ ...values, isMember: !values.isMember });
+  };
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -23,44 +34,56 @@ function Register() {
       toast.error("Please Fill Out All Fields");
       return;
     }
-    if (isMember) {
-      dispatch(loginUser({ email: email, password: password }));
+    if (values.isMember) {
+      dispatch(loginUser({ email, password }));
       return;
     }
     dispatch(registerUser({ name, email, password }));
-  };
-  const handleChange = (e) => {
-    const name = e.target.name;
-    const value = e.target.value;
-    console.log(`${name}:${value}`);
-    setValues({ ...values, [name]: value });
   };
 
   return (
     <Wrapper className="full-page">
       <form className="form" onSubmit={onSubmit}>
         <Logo />
-        <h3>Login</h3>
+        <h3>{values.isMember ? "Login" : "Register"}</h3>
 
         {/* name field */}
-        <div className="form-row">
-          <label htmlFor="name" className="form-label">
-            name
-          </label>
-
-          <input
+        {!values.isMember && (
+          <FormRow
             type="text"
-            value={values.name}
             name="name"
-            onChange={handleChange}
-            className="form-input"
+            value={values.name}
+            handleChange={handleChange}
           />
-        </div>
+        )}
+
+        <FormRow
+          type="email"
+          name="email"
+          value={values.email}
+          handleChange={handleChange}
+        />
+
+        <FormRow
+          type="password"
+          name="password"
+          value={values.password}
+          handleChange={handleChange}
+        />
 
         <button type="submit" className="btn btn-block">
           submit
         </button>
       </form>
+      <p>
+        {values.isMember ? "Not a member yet?" : "Already a member?"}
+
+        <button type="button" onClick={toggleMember} className="member-btn">
+          {values.isMember ? "Register" : "Login"}
+        </button>
+      </p>
     </Wrapper>
   );
-}
+};
+
+export default Register;
