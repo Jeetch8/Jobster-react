@@ -6,6 +6,7 @@ import { FormRowSelect } from "../../components";
 import {
   clearValues,
   createJob,
+  editJob,
   handleChange,
 } from "../../features/job/jobSlice";
 import { useEffect } from "react";
@@ -28,10 +29,10 @@ const AddJob = () => {
   const { user } = useSelector((store) => store.user);
 
   useEffect(() => {
-    if (isEditing) {
+    if (!isEditing) {
       dispatch(handleChange({ name: "jobLocation", value: user.location }));
     }
-  });
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -48,6 +49,22 @@ const AddJob = () => {
     const value = e.target.value;
     dispatch(handleChange({ name, value }));
   };
+
+  if (isEditing) {
+    dispatch(
+      editJob({
+        jobId: editJobId,
+        job: {
+          position,
+          company,
+          jobLocation,
+          jobType,
+          status,
+        },
+      })
+    );
+    return;
+  }
 
   return (
     <Wrapper>
